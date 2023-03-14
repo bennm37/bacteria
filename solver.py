@@ -103,11 +103,12 @@ class Colony:
 
 
 class Analysis:
-    def __init__(self,locations,states,velocities,parameters):
+    def __init__(self,locations,states,velocities,parameters,verbose=False):
         self.parameters = parameters
         self.locations = locations
         self.states = states
         self.velocities = velocities
+        self.verbose = verbose
 
     def plot(self,i):
         fig, ax = plt.subplots()
@@ -127,20 +128,26 @@ class Analysis:
         ax.axis("equal")
         ax.axis("off")
     
-    def plot_density(self,i):
+    def plot_density(self,i,ax=None,zmax=50):
         locations = self.locations[i,:,:]
-        print("Solving for histogram ... ")
-        H,xedges,yedges = np.histogram2d(locations[:,0],locations[:,1],bins=20)
-        print("Plotting ... ")
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
+        if self.verbose:
+            print("Solving for histogram ... ")
+        xedges = np.linspace(0,self.parameters["L"],21)
+        H,xedges,yedges = np.histogram2d(locations[:,0],locations[:,1],bins=(xedges, xedges))
+        if self.verbose:
+            print("Plotting ... ")
+
+        if ax is None:
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+        ax.set(xlim=(0, self.parameters["L"]), ylim=(0, self.parameters["L"]),zlim=(0, zmax))
         X, Y = np.meshgrid(xedges[:-1], yedges[:-1])
-        ax.plot_surface(X, Y, H, cmap=cm.coolwarm)
-        plt.show()
+        ax.plot_surface(X, Y, H, cmap=cm.coolwarm,vmin=0,vmax=zmax)
+        return ax
     
     def animate(self,stride=1):
         fig, ax = plt.subplots()
-        fig.set_size_inches(10,10)
+        fig.set_size_inches(6,6)
         cmap = cm.get_cmap("jet")
         self.speeds = lag.norm(self.velocities[0],axis=1)
         quiver = ax.quiver(self.locations[0,:,0],self.locations[0,:,1],self.velocities[0,:,0],self.velocities[0,:,1],scale=20,cmap="coolwarm")
@@ -163,9 +170,9 @@ class Analysis:
 
     def animate_dots(self,stride=1):
         fig, ax = plt.subplots()
-        fig.set_size_inches(10,10)
+        fig.set_size_inches(6,6)
         self.speeds = lag.norm(self.velocities[0],axis=1)
-        scatter = ax.scatter(self.locations[0,:,0],self.locations[0,:,1],c="k",s=10)
+        scatter = ax.scatter(self.locations[0,:,0],self.locations[0,:,1],c="k",s=0.5)
         X,Y = np.meshgrid(np.linspace(0,self.parameters["L"],100),np.linspace(0,self.parameters["L"],100))
         chemical_function = self.parameters["chemical"]
         ax.imshow(chemical_function(X,Y),extent=(0,self.parameters["L"],0,self.parameters["L"]),origin="lower",cmap="coolwarm",alpha=0.5)
@@ -175,5 +182,21 @@ class Analysis:
         def update(j):
             i = j*stride
             scatter.set_offsets(self.locations[i])
+        anim = animation.FuncAnimation(fig,update,frames=self.locations.shape[0]//stride,interval=10)
+        return anim
+
+    def animate_density(self,stride=1):
+        fig = plt.figure()
+        xedges = np.linspace(0,self.parameters["L"],21)
+        H,xedges,yedges = np.histogram2d(self.locations[-1,:,0],self.locations[-1,:,1],bins=(xedges, xedges))
+        zmax = H.max()
+        print(zmax)
+        ax = fig.add_subplot(111, projection='3d')
+        fig.set_size_inches(6,6)
+        ax1 = self.plot_density(0,ax,zmax)
+        def update(j):
+            i = j*stride
+            ax.clear()
+            ax1 = self.plot_density(i,ax,zmax)
         anim = animation.FuncAnimation(fig,update,frames=self.locations.shape[0]//stride,interval=10)
         return anim
