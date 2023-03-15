@@ -91,6 +91,7 @@ class Colony:
         self.signal = self.chemical(self.locations[:,0],self.locations[:,1])
         self.states += self.state_ODE(self.signal,self.states[:,0],self.states[:,1])*self.dt
         self.lambdas = self.lambda0-self.taxis_strength*(self.signal-self.states[:,1])
+        
     def rotation_kernel(self,theta):
         return theta+np.random.uniform(-np.pi,np.pi,self.turn)
 
