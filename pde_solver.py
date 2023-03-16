@@ -34,15 +34,15 @@ class PDE_Solver:
         self.dx = self.dx / self.L
         self.mu = self.dt / self.dx**2
         self.eta = self.dt / (2 * self.dx)
-        self.n_space_points = int(self.L / self.dx)
         self.U = np.ones([self.M, self.n_space_points, self.n_space_points])
+        # setting up mesh with ghost points
         self.X, self.Y = np.meshgrid(
-            np.linspace(0, 1, self.n_space_points),
-            np.linspace(0, 1, self.n_space_points),
+            np.arange(0, 1, self.dx),
+            np.arange(0, 1, self.dx),
         )
+        self.n_space_points = self.X.shape[0]
         self.U[0, :, :] = self.initial_condition(self.X, self.Y)
-        self.chemical_values = self.chemical(self.X, self.Y)
-        self.chemical_gradient = [component/self.dx for component in np.gradient(self.chemical_values)]
+        self.S = self.chemical(self.X, self.Y)
         for m in range(self.M - 1):
             if self.verbose and m % 100 == 0:
                 print("Time step: ", m)
@@ -51,26 +51,24 @@ class PDE_Solver:
             U_up = self.U[m, 1:-1, 2:]
             U_down = self.U[m, 1:-1, :-2]
             U_center = self.U[m, 1:-1, 1:-1]
-            gradient_right = self.chemical_gradient[0][1:-1, 2:]
-            gradient_left = self.chemical_gradient[0][1:-1, :-2]
-            gradient_up = self.chemical_gradient[1][2:, 1:-1]
-            gradient_down = self.chemical_gradient[1][:-2, 1:-1]
+            S_left = self.S[:-2, 1:-1]
+            S_right = self.S[2:, 1:-1]
+            S_up = self.S[1:-1, 2:]
+            S_down = self.S[1:-1, :-2]
+            S_center = self.S[1:-1, 1:-1]
             self.U[m + 1, 1:-1, 1:-1] = (
                 U_center
                 + self.mu * (U_right + U_left + U_up + U_down - 4 * U_center)
-                - self.eta* (
-                    gradient_right * U_right
-                    - gradient_left * U_left
-                    + gradient_up * U_up
-                    - gradient_down * U_down
-                )
+                + self.mu * (S_right + S_left + S_up + S_down - 4 * S_center)
+                + self.mu/4 *(U_right-U_left)*(S_right-S_left)
+                + self.mu/4 *(U_up-U_down)*(S_up-S_down)
             )
-            # setting no flux boundary conditions
-            # TODO this is wrong! It should invlove the gradient of the chemical
-            self.U[m + 1, 0, :] = self.U[m + 1, 1, :]
-            self.U[m + 1, -1, :] = self.U[m + 1, -2, :]
-            self.U[m + 1, :, 0] = self.U[m + 1, :, 1]
-            self.U[m + 1, :, -1] = self.U[m + 1, :, -2]
+            # setting ghost points for no flux boundary conditions
+            # TODO this is wrong! It should invlove the gradient of the chemical (flux is no dn/dx)
+            self.U[m + 1, 0, :] = self.U[m + 1, 1, :]/(1+self.S[1,:]-self.S[0,:]) #left
+            self.U[m + 1, -1, :] = self.U[m + 1, -2, :]/(1-(self.S[-1,:]-self.S[-2,:])) #right
+            self.U[m + 1, :, 0] = self.U[m + 1, :, 1]/(1+self.S[:,1]-self.S[:,0]) #bottom
+            self.U[m + 1, :, -1] = self.U[m + 1, :, -2]/(1-(self.S[:,-1]-self.S[:,-2])) #top
             # self.chemical = self.chemical + self.dt*self.chemical_ODE(self.chemical,self.X,self.Y)
             # self.chemical_gradient = np.gradient(self.chemical)
 
