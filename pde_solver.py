@@ -66,6 +66,7 @@ class PDE_Solver:
                 )
             )
             # setting no flux boundary conditions
+            # TODO this is wrong! It should invlove the gradient of the chemical
             self.U[m + 1, 0, :] = self.U[m + 1, 1, :]
             self.U[m + 1, -1, :] = self.U[m + 1, -2, :]
             self.U[m + 1, :, 0] = self.U[m + 1, :, 1]
