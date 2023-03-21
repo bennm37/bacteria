@@ -9,14 +9,16 @@ parameters["M"] = 5000
 parameters
 c = Colony(parameters,False)
 foldername = "data/test"
-c.run(overwrite=True,array=False,save_frequency=50,foldername=foldername)
+c.run(overwrite=True,array=False,save_frequency=10,foldername=foldername)
 print("Ran simulation")
 a = Analysis(foldername,parameters,verbose=False)
+anim = a.animate_dots(1)
+anim.save("media/dots.mp4")
 # fig = plt.figure()
 # ax = fig.add_subplot(111,projection="3d")
 # a.plot_density(-1,ax,nedges=41,zmax=20)
-anim = a.animate_density(1,nedges=21)
-anim.save("media/test_loading.mp4",fps=10)
+# anim = a.animate_density(1,nedges=21)
+# anim.save("media/test_loading.mp4",fps=10)
 # anim = a.animate_dots(50)
 
 
