@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from default_parameters import *
 
-parameters["N"] = 20000
-parameters["M"] = 200000
+parameters["N"] = 1000
+parameters["M"] = 2000
 parameters["seed"] = 101
 parameters["initial_condition"] = "delta"
 # flipped_pyramid = lambda x,y: np.array(pyramid(x,y))[::-1,::-1]
