@@ -18,6 +18,7 @@ class Colony:
         self.dt = parameters["dt"]
         self.chemical = parameters["chemical"]
         self.taxis_strength = parameters["taxis_strength"]
+        self.speed = parameters["speed"]
         self.state_ODE = parameters["state_ODE"]
         self.initial_condition = parameters["initial_condition"]
         self.dimension = parameters["dimension"]
@@ -36,7 +37,17 @@ class Colony:
         if self.initial_condition == "uniform":
             self.locations = np.random.uniform(0, self.L, [self.N, self.dimension])
             self.thetas = np.random.uniform(-np.pi, np.pi, [self.N, 1])
-            self.speeds = np.random.uniform(1,1, [self.N, 1])
+            self.speeds = self.speed * np.ones([self.N, 1])
+            self.velocities = np.concatenate(
+                [np.cos(self.thetas), np.sin(self.thetas)], axis=1
+            )
+            self.velocities = self.velocities * self.speeds
+
+        elif self.initial_condition == "delta":
+            # self.locations = np.random.uniform(0.6*self.L, 0.8*self.L, [self.N, self.dimension])
+            self.locations = np.ones([self.N, self.dimension])*[self.L/2,3*self.L/10]
+            self.thetas = np.random.uniform(-np.pi, np.pi, [self.N, 1])
+            self.speeds = self.speed * np.ones([self.N, 1])
             self.velocities = np.concatenate(
                 [np.cos(self.thetas), np.sin(self.thetas)], axis=1
             )
@@ -93,7 +104,7 @@ class Colony:
         self.lambdas = self.lambda0-self.taxis_strength*(self.signal-self.states[:,1])
         
     def rotation_kernel(self,theta):
-        return theta+np.random.uniform(-np.pi,np.pi,self.turn)
+        return np.random.uniform(-np.pi,np.pi,self.N)
 
     def update_velocities(self):
         r1 = np.random.uniform(0, 1, self.N)

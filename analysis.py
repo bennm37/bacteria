@@ -8,25 +8,25 @@ import shutil as sh
 import glob
 
 class Analysis:
-    def __init__(self,foldername,parameters,verbose=False):
+    def __init__(self,foldername,parameters,verbose=False,stride=1):
         self.parameters = parameters
         self.foldername = foldername
         self.verbose = verbose
-        self.load_data()
+        self.load_data(stride=stride)
         if verbose:
             print("Loaded Data")
     
-    def load_data(self):
+    def load_data(self,stride = 1):
         npzfiles = glob.glob(f"{self.foldername}/*.npz")
         self.times = [float(file.split("_")[-1][:-4]) for file in npzfiles]
         # sort files based on times 
         npzfiles = [file for _,file in sorted(zip(self.times,npzfiles))]
-        n_files = len(npzfiles)
+        n_files = len(npzfiles)//stride
         self.location_data = np.zeros([n_files,self.parameters["N"],self.parameters["dimension"]])
         self.state_data = np.zeros([n_files,self.parameters["N"],self.parameters["n_states"]])
         self.velocity_data = np.zeros([n_files,self.parameters["N"],self.parameters["dimension"]])
         self.signal_data = np.zeros([n_files,self.parameters["N"]])
-        for i,file in enumerate(npzfiles):
+        for i,file in enumerate(npzfiles[::stride]):
             data = np.load(file)
             self.location_data[i] = data["locations"]
             self.state_data[i] = data["states"]
