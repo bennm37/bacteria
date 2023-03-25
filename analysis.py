@@ -46,8 +46,8 @@ class Analysis:
             scale=20,
         )
         # ax.quiver(self.location_data[:,0],self.location_data[:,1],self.velocity_data[:,0],self.velocity_data[:,1],cmap="viridis")
-        ax.set_xlim(0, self.parameters["L"])
-        ax.set_ylim(0, self.parameters["L"])
+        ax.set_xlim(0, self.parameters["Lx"])
+        ax.set_ylim(0, self.parameters["Ly"])
         ax.axis("equal")
         ax.axis("off")
     
@@ -55,15 +55,16 @@ class Analysis:
         locations = self.location_data[i,:,:]
         if self.verbose:
             print("Solving for histogram ... ")
-        xedges = np.linspace(0,self.parameters["L"],nedges)
-        H,xedges,yedges = np.histogram2d(locations[:,0],locations[:,1],bins=(xedges, xedges))
+        xedges = np.linspace(0,self.parameters["Lx"],nedges)
+        yedges = np.linspace(0,self.parameters["Ly"],nedges)
+        H,xedges,yedges = np.histogram2d(locations[:,0],locations[:,1],bins=(xedges, yedges))
         if self.verbose:
             print("Plotting ... ")
 
         if ax is None:
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')
-        ax.set(xlim=(0, self.parameters["L"]), ylim=(0, self.parameters["L"]),zlim=(0, zmax))
+        ax.set(xlim=(0, self.parameters["Lx"]), ylim=(0, self.parameters["Ly"]),zlim=(0, zmax))
         X, Y = np.meshgrid(xedges[:-1], yedges[:-1])
         ax.plot_surface(X, Y, H, cmap=cm.coolwarm,vmin=0,vmax=zmax)
         return ax
@@ -81,7 +82,7 @@ class Analysis:
         lines,= ax.plot(self.location_data[0,0,0],self.location_data[0,0,1])
         ax.axis("off")
         ax.axis("equal")
-        ax.set(xlim=(0,self.parameters["L"]),ylim=(0,self.parameters["L"]))
+        ax.set(xlim=(0,self.parameters["Lx"]),ylim=(0,self.parameters["Ly"]))
         def update(j):
             lines.set_data(self.location_data[:j*stride,0,0],self.location_data[:j*stride,0,1])
             i = j*stride
@@ -96,12 +97,12 @@ class Analysis:
         fig.set_size_inches(6,6)
         self.speeds = lag.norm(self.velocity_data[0],axis=1)
         scatter = ax.scatter(self.location_data[0,:,0],self.location_data[0,:,1],c="k",s=0.5)
-        X,Y = np.meshgrid(np.linspace(0,self.parameters["L"],100),np.linspace(0,self.parameters["L"],100))
+        X,Y = np.meshgrid(np.linspace(0,self.parameters["Lx"],100),np.linspace(0,self.parameters["Ly"],100))
         chemical_function = self.parameters["chemical"]
-        ax.imshow(chemical_function(X,Y),extent=(0,self.parameters["L"],0,self.parameters["L"]),origin="lower",cmap="coolwarm",alpha=0.5)
+        ax.imshow(chemical_function(X,Y),extent=(0,self.parameters["Lx"],0,self.parameters["Ly"]),origin="lower",cmap="coolwarm",alpha=0.5)
         ax.axis("off")
         ax.axis("equal")
-        ax.set(xlim=(0,self.parameters["L"]),ylim=(0,self.parameters["L"]))
+        ax.set(xlim=(0,self.parameters["Lx"]),ylim=(0,self.parameters["Ly"]))
         def update(j):
             i = j*stride
             scatter.set_offsets(self.location_data[i])
@@ -110,8 +111,9 @@ class Analysis:
 
     def animate_density(self,stride=1,nedges=21):
         fig = plt.figure()
-        xedges = np.linspace(0,self.parameters["L"],nedges)
-        H,xedges,yedges = np.histogram2d(self.location_data[-1,:,0],self.location_data[-1,:,1],bins=(xedges, xedges))
+        xedges = np.linspace(0,self.parameters["Lx"],nedges)
+        yedges = np.linspace(0,self.parameters["Ly"],nedges)
+        H,xedges,yedges = np.histogram2d(self.location_data[-1,:,0],self.location_data[-1,:,1],bins=(xedges, yedges))
         zmax = H.max()
         print(zmax)
         ax = fig.add_subplot(111, projection='3d')

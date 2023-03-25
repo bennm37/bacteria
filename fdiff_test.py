@@ -39,8 +39,8 @@ def plot_mass(container):
 # "dxxU+dyyU-(dxU*dxS+dyU*dyS+U*dxxS+U*dyyS)"
 model = Model(["dxxU+dyyU-(dxU*dxS+dyU*dyS+U*dxxS+U*dyyS)","k*(dxxS+dyyS)"],
               ["U(x,y)","S(x,y)"],parameters = "k",boundary_conditions="noflux")
-x = np.linspace(0,1,100)
-y = np.linspace(0,1,100)
+x = np.linspace(0,1,50)
+y = np.linspace(0,1,50)
 X,Y = np.meshgrid(x,y)
 delta = lambda x,y : np.where(np.logical_and(x>0.6,x<0.8),np.where(np.logical_and(y>0.6,y<0.8),1,0),0)
 def pyramid(x, y): 
@@ -52,7 +52,7 @@ def pyramid(x, y):
     return 5*pyramid
 U  = delta(X,Y)
 S = pyramid(X,Y)
-initial_fields = model.Fields(x=x,y=y,U=U,S=S,k=1)
+initial_fields = model.Fields(x=x,y=y,U=U,S=S,k=0)
 simulation = Simulation(model,initial_fields,dt=0.001,tmax=0.1)
 container = simulation.attach_container()
 tmax,last_fields = simulation.run()

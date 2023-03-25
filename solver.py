@@ -13,7 +13,8 @@ class Colony:
         self.parameters = parameters
         self.verbose = verbose
         self.N = parameters["N"]
-        self.L = parameters["L"]
+        self.Lx = parameters["Lx"]
+        self.Ly = parameters["Ly"]
         self.M = parameters["M"]
         self.dt = parameters["dt"]
         self.chemical = parameters["chemical"]
@@ -35,7 +36,10 @@ class Colony:
         self.velocities = np.zeros([self.N, self.dimension])
         self.states = np.zeros([self.N, self.n_states])
         if self.initial_condition == "uniform":
-            self.locations = np.random.uniform(0, self.L, [self.N, self.dimension])
+            self.locations = np.concatenate(
+                [np.random.uniform(0,self.Lx,self.N), np.random.uniform(0,self.Ly,self.N)], axis=1
+            )
+            # self.locations = np.random.uniform(0, self.L, [self.N, self.dimension])
             self.thetas = np.random.uniform(-np.pi, np.pi, [self.N, 1])
             self.speeds = self.speed * np.ones([self.N, 1])
             self.velocities = np.concatenate(
@@ -45,7 +49,7 @@ class Colony:
 
         elif self.initial_condition == "delta":
             # self.locations = np.random.uniform(0.6*self.L, 0.8*self.L, [self.N, self.dimension])
-            self.locations = np.ones([self.N, self.dimension])*[self.L/2,3*self.L/10]
+            self.locations = np.ones([self.N, self.dimension])*[10,3]
             self.thetas = np.random.uniform(-np.pi, np.pi, [self.N, 1])
             self.speeds = self.speed * np.ones([self.N, 1])
             self.velocities = np.concatenate(
@@ -82,7 +86,12 @@ class Colony:
                 # plt.show()
             
             t = i * self.dt
-            self.locations = (self.locations+self.velocities * self.dt)%self.L
+            self.locations = (self.locations+self.velocities * self.dt)
+            # implementing no-flux boundary conditions
+            self.locations[:,0] = np.where(self.locations[:,0]<0,np.zeros_like(self.locations[:,0]),self.locations[:,0])
+            self.locations[:,0] = np.where(self.locations[:,0]>self.Lx,self.Lx*np.ones_like(self.locations[:,0]),self.locations[:,0])
+            self.locations[:,1] = np.where(self.locations[:,1]<0,np.zeros_like(self.locations[:,1]),self.locations[:,1])
+            self.locations[:,1] = np.where(self.locations[:,1]>self.Ly,self.Ly*np.ones_like(self.locations[:,1]),self.locations[:,1])
             self.update_states()
             self.update_velocities()
             if array:
@@ -134,8 +143,8 @@ class Colony:
             scale=20,
         )
         # ax.quiver(self.locations[:,0],self.locations[:,1],self.velocities[:,0],self.velocities[:,1],cmap="viridis")
-        ax.set_xlim(0, self.L)
-        ax.set_ylim(0, self.L)
+        ax.set_xlim(0, self.Lx)
+        ax.set_ylim(0, self.Ly)
         ax.axis("equal")
         ax.axis("off")
         plt.show()
