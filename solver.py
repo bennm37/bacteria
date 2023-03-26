@@ -60,13 +60,13 @@ class Colony:
         else:
             raise ValueError("Initial condition not recognised")
 
-    def run(self,array=True,save=True,save_frequency =10,foldername="data/test",overwrite=False):
+    def run(self,array=True,save="all",save_frequency =10,foldername="data/test",overwrite=False):
         if array:
             self.location_data = np.zeros([self.M, self.N, self.dimension])
             self.state_data = np.zeros([self.M, self.N, self.n_states])
             self.signal_data = np.zeros([self.M, self.N])
             self.velocity_data = np.zeros([self.M, self.N, self.dimension])
-        if save:
+        if save.lower() != "none":
             try:
                 os.mkdir(foldername)
             except FileExistsError:
@@ -99,9 +99,14 @@ class Colony:
                 self.state_data[i] = self.states
                 self.signal_data[i] = self.signal
                 self.velocity_data[i] = self.velocities
-            if save:
+            if save == "all":
                 if i%save_frequency==0:
                     np.savez(f"{foldername}/data_{np.round(i*self.dt,2)}",locations=self.locations,states=self.states,velocities=self.velocities,signal=self.signal)
+            elif save == "locations":
+                if i%save_frequency==0:
+                    np.savez(f"{foldername}/data_{np.round(i*self.dt,2)}",locations=self.locations)
+            
+
         if array:
             return self.location_data, self.state_data, self.velocity_data, self.signal_data
         else:

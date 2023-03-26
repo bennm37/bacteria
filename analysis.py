@@ -26,12 +26,18 @@ class Analysis:
         self.state_data = np.zeros([n_files,self.parameters["N"],self.parameters["n_states"]])
         self.velocity_data = np.zeros([n_files,self.parameters["N"],self.parameters["dimension"]])
         self.signal_data = np.zeros([n_files,self.parameters["N"]])
+        only_locations = False
         for i,file in enumerate(npzfiles[::stride]):
             data = np.load(file)
             self.location_data[i] = data["locations"]
-            self.state_data[i] = data["states"]
-            self.velocity_data[i] = data["velocities"]
-            self.signal_data[i] = data["signal"]
+            if not only_locations:
+                try:
+                    self.state_data[i] = data["states"]
+                    self.velocity_data[i] = data["velocities"]
+                    self.signal_data[i] = data["signal"]
+                except KeyError:
+                    print("Only loaction data available")
+                    only_locations = True
 
     def plot(self,i):
         fig, ax = plt.subplots()
