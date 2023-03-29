@@ -5,8 +5,9 @@ import numpy as np
 from default_parameters import *
 from pyramid import offset_pyramid
 
-parameters["N"] = int(1e4)
-parameters["M"] = 20000
+
+parameters["N"] = int(1e6)
+parameters["M"] = 200000
 parameters["seed"] = 101
 parameters["initial_condition"] = "delta"
 parameters["Lx"] = 20
@@ -26,7 +27,7 @@ parameters["chemical"] = lambda x,y: 8*offset_pyramid(x,y,c=[12,6])
 
 c = Colony(parameters,True)
 foldername = f"data/N={parameters['N']}_params_6.1"
-c.run(overwrite=False,array=False,save_frequency=100,foldername=foldername,save="locations")
+c.run(overwrite=False,array=False,save_frequency=20000,foldername=foldername,save="locations")
 print("Ran simulation")
 a = Analysis(foldername,parameters,verbose=False,stride=1)
 # anim = a.animate_dots(1)

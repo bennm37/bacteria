@@ -6,6 +6,7 @@ import matplotlib.animation as animation
 import os 
 import shutil as sh
 import glob
+import time
 
 
 class Colony:
@@ -78,10 +79,12 @@ class Colony:
                     os.mkdir(foldername)
                 else:
                     raise ValueError("Folder already exists")
-                
+        start = time.perf_counter()
         for i in range(self.M):
-            if self.verbose and i % 100 == 0:
+            if self.verbose and i % 10 == 0:
                 print(f"Ran up to t = {i*self.dt}")
+                print(f"Time taken: {time.perf_counter()-start}")
+                print("Esitamated time remaining: ",(time.perf_counter()-start)/(i+1)*(self.M-i-1))
                 # self.plot_cells()
                 # plt.show()
             
