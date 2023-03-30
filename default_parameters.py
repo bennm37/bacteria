@@ -33,5 +33,10 @@ parameters = {
     "lambda0": 1,
     "initial_condition": "delta",
     "dimension": 2,
-    "seed": 3
+    "seed": 3,
+    "overwrite":False,
+    "array":False,
+    "save_frequency":100,
+    "foldername":"test",
+    "save":"locations"
 }

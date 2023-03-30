@@ -27,6 +27,11 @@ class Colony:
         self.lambda0 = parameters["lambda0"]
         self.lambdas = np.ones(self.N)*self.lambda0
         self.n_states = parameters["n_states"]
+        self.overwrite = parameters["overwrite"]
+        self.array = parameters["array"]
+        self.save_frequency = parameters["save_frequency"]
+        self.foldername = parameters["foldername"]
+        self.save = parameters["save"]
         self.turn = 1
         np.random.seed(self.seed)
         self.initialise_cells()
@@ -60,22 +65,22 @@ class Colony:
         else:
             raise ValueError("Initial condition not recognised")
 
-    def run(self,array=True,save="all",save_frequency =10,foldername="data/test",overwrite=False):
-        if array:
+    def run(self):
+        if self.array:
             self.location_data = np.zeros([self.M, self.N, self.dimension])
             self.state_data = np.zeros([self.M, self.N, self.n_states])
             self.signal_data = np.zeros([self.M, self.N])
             self.velocity_data = np.zeros([self.M, self.N, self.dimension])
-        if save.lower() != "none":
+        if self.save.lower() != "none":
             try:
-                os.mkdir(foldername)
+                os.mkdir(self.foldername)
             except FileExistsError:
-                if overwrite:
-                    sh.rmtree(foldername)
-                    os.mkdir(foldername)
-                elif input(f"Delete Folder {foldername}?    ").lower() in ["y","yes"]:
-                    sh.rmtree(foldername)
-                    os.mkdir(foldername)
+                if self.overwrite:
+                    sh.rmtree(self.foldername)
+                    os.mkdir(self.foldername)
+                elif input(f"Delete Folder {self.foldername}?    ").lower() in ["y","yes"]:
+                    sh.rmtree(self.foldername)
+                    os.mkdir(self.foldername)
                 else:
                     raise ValueError("Folder already exists")
                 
@@ -94,20 +99,20 @@ class Colony:
             self.locations[:,1] = np.where(self.locations[:,1]>self.Ly,self.Ly*np.ones_like(self.locations[:,1]),self.locations[:,1])
             self.update_states()
             self.update_velocities()
-            if array:
+            if self.array:
                 self.location_data[i] = self.locations
                 self.state_data[i] = self.states
                 self.signal_data[i] = self.signal
                 self.velocity_data[i] = self.velocities
-            if save == "all":
-                if i%save_frequency==0:
-                    np.savez(f"{foldername}/data_{np.round(i*self.dt,2)}",locations=self.locations,states=self.states,velocities=self.velocities,signal=self.signal)
-            elif save == "locations":
-                if i%save_frequency==0:
-                    np.savez(f"{foldername}/data_{np.round(i*self.dt,2)}",locations=self.locations)
+            if self.save == "all":
+                if i%self.save_frequency==0:
+                    np.savez(f"{self.foldername}/data_{np.round(i*self.dt,2)}",locations=self.locations,states=self.states,velocities=self.velocities,signal=self.signal)
+            elif self.save == "locations":
+                if i%self.save_frequency==0:
+                    np.savez(f"{self.foldername}/data_{np.round(i*self.dt,2)}",locations=self.locations)
             
 
-        if array:
+        if self.array:
             return self.location_data, self.state_data, self.velocity_data, self.signal_data
         else:
             return None
