@@ -5,7 +5,7 @@ import numpy as np
 from default_parameters import *
 from pyramid import offset_pyramid
 
-parameters["N"] = int(1e4)
+parameters["N"] = int(1e6)
 parameters["M"] = 2000
 parameters["seed"] = 101
 parameters["initial_condition"] = "delta"
@@ -18,9 +18,10 @@ parameters["save"] = "all"
 
 
 c = Colony(parameters,False)
-foldername = f"data/N={parameters['N']}_params_6.1"
-c.run()
-print("Ran simulation")
+# foldername = f"data/N={parameters['N']}_params_6.1_preview"
+foldername = f"data/figure_6.1_final_data"
+# c.run()
+# print("Ran simulation")
 a = Analysis(foldername,parameters,verbose=False,stride=1)
 anim = a.animate_density(1,nedges=21)
 plt.show()
