@@ -3,6 +3,7 @@ import pylab as pl
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import os
 
 def fdiff_animate(U):
     fig,ax = plt.subplots()
@@ -37,13 +38,24 @@ def plot_mass(t,U):
     return ax 
 def normalise(U):
     return U/np.sum(U,axis=(1,2))
-# Define the model
-# "dxxU+dyyU-(dxU*dxS+dyU*dyS+U*dxxS+U*dyyS)"d
-model = Model(["dxxU+dyyU-(dxU*dxS+dyU*dyS+U*dxxS+U*dyyS)","k*(dxxS+dyyS)"],
-              ["U(x,y)","S(x,y)"],parameters = "k",boundary_conditions="noflux")
-x = np.linspace(0,1,50)
-y = np.linspace(0,2,50)
-X,Y = np.meshgrid(x,y)
+def save(container,folder_name):
+    os.mkdir(folder_name)
+    t = container.data.t
+    x = container.data.x
+    y = container.data.y
+    U = container.data.U
+    S = container.data.S
+    np.savez(f"{folder_name}/data.npz",t=t,x=x,y=y,U=U,S=S)
+
+def load(folder_name):
+    data = np.load(f"{folder_name}/data.npz")
+    t = data["t"]
+    x = data["x"]
+    y = data["y"]
+    U = data["U"]
+    S = data["S"]
+    return t,x,y,U,S
+
 delta = lambda x,y : np.where(np.logical_and(x>0.6,x<0.8),np.where(np.logical_and(y>0.6,y<0.8),1,0),0)
 def pyramid(x, y): 
     X,Y = 2*x-1, 2*y-1
@@ -52,23 +64,31 @@ def pyramid(x, y):
     pyramid = np.where(np.logical_and(Y>=X,Y<=-X),1+X,pyramid)
     pyramid = np.where(np.logical_and(Y>=X,Y>=-X),1-Y,pyramid)
     return 5*pyramid
+        
+# Define the model
+# "dxxU+dyyU-(dxU*dxS+dyU*dyS+U*dxxS+U*dyyS)"d
+model = Model(["dxxU+dyyU-(dxU*dxS+dyU*dyS+U*dxxS+U*dyyS)","k*(dxxS+dyyS)"],
+              ["U(x,y)","S(x,y)"],parameters = "k",boundary_conditions="noflux")
+x = np.linspace(0,1,50)
+y = np.linspace(0,1,50)
+X,Y = np.meshgrid(x,y)
 U  = delta(X,Y)
 S = pyramid(X,Y)
-initial_fields = model.Fields(x=x,y=y,U=U,S=S,k=0)
+initial_fields = model.Fields(x=x,y=y,U=U,S=S,k=1)
 simulation = Simulation(model,initial_fields,dt=0.001,tmax=0.2)
 container = simulation.attach_container()
 tmax,last_fields = simulation.run()
+folder_name = "data/test_fdiff"
+save(container,folder_name)
 
-t = container.data.t
-x = container.data.x
-y = container.data.y
-U = container.data.U
-S = container.data.S
-
+folder_name = "data/test_fdiff"
+t,x,y,U,S = load(folder_name)
 # U = normalise(U)
 plot_mass(t,S)
 plt.show()
 anim = fdiff_animate_3d(x,y,S)
+plt.show()
+anim = fdiff_animate_3d(x,y,U)
 plt.show()
 # anim.save("media/delta_pyramid_fdiff.mp4")
 
