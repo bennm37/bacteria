@@ -57,13 +57,14 @@ class Analysis:
         ax.axis("equal")
         ax.axis("off")
     
-    def plot_density(self,i,ax=None,zmax=50,nedges=21):
+    def plot_density(self,i,ax=None,zmax=50,nedges=21,scale=1):
         locations = self.location_data[i,:,:]
         if self.verbose:
             print("Solving for histogram ... ")
         xedges = np.linspace(0,self.parameters["Lx"],nedges)
         yedges = np.linspace(0,self.parameters["Ly"],nedges)
         H,xedges,yedges = np.histogram2d(locations[:,0],locations[:,1],bins=(xedges, yedges))
+        H = H*scale
         if self.verbose:
             print("Plotting ... ")
 
@@ -115,19 +116,19 @@ class Analysis:
         anim = animation.FuncAnimation(fig,update,frames=self.location_data.shape[0]//stride,interval=10)
         return anim
 
-    def animate_density(self,stride=1,nedges=21):
+    def animate_density(self,stride=1,nedges=21,scale=1):
         fig = plt.figure()
         xedges = np.linspace(0,self.parameters["Lx"],nedges)
         yedges = np.linspace(0,self.parameters["Ly"],nedges)
         H,xedges,yedges = np.histogram2d(self.location_data[-1,:,0],self.location_data[-1,:,1],bins=(xedges, yedges))
+        H = H*scale
         zmax = H.max()
-        print(zmax)
         ax = fig.add_subplot(111, projection='3d')
         fig.set_size_inches(6,6)
-        ax1 = self.plot_density(0,ax,zmax=zmax,nedges=nedges)
+        ax1 = self.plot_density(0,ax,zmax=zmax,nedges=nedges,scale=scale)
         def update(j):
             i = j*stride
             ax.clear()
-            ax1 = self.plot_density(i,ax,zmax,nedges=nedges)
+            ax1 = self.plot_density(i,ax,zmax,nedges=nedges,scale=scale)
         anim = animation.FuncAnimation(fig,update,frames=self.location_data.shape[0]//stride,interval=10)
         return anim

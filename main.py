@@ -23,5 +23,7 @@ foldername = f"data/figure_6.1_final_data"
 # c.run()
 # print("Ran simulation")
 a = Analysis(foldername,parameters,verbose=False,stride=1)
-anim = a.animate_density(1,nedges=21)
+nedges = 20
+scale = (nedges-1)**2/1e6
+anim = a.animate_density(1,nedges=nedges,scale=scale)
 plt.show()

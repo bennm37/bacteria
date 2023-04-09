@@ -40,3 +40,13 @@ parameters = {
     "foldername":"test",
     "save":"locations"
 }
+
+
+# PDE paper parameters
+b = 1 
+te = 0 
+ta = 1
+lambda0 = 1
+s = 0.1 
+D = (s**2)/(2*lambda0)
+chi = (b*s**2*ta)/(2*lambda0*(1+te*lambda0)*(1+ta*lambda0))
