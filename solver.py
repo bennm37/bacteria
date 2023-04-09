@@ -67,10 +67,10 @@ class Colony:
 
     def run(self):
         if self.array:
-            self.location_data = np.zeros([self.M, self.N, self.dimension])
-            self.state_data = np.zeros([self.M, self.N, self.n_states])
-            self.signal_data = np.zeros([self.M, self.N])
-            self.velocity_data = np.zeros([self.M, self.N, self.dimension])
+            self.location_data = np.zeros([self.M//self.save_frequency, self.N, self.dimension])
+            # self.state_data = np.zeros([self.M, self.N, self.n_states])
+            # self.signal_data = np.zeros([self.M, self.N])
+            # self.velocity_data = np.zeros([self.M, self.N, self.dimension])
         if self.save.lower() != "none":
             try:
                 os.mkdir(self.foldername)
@@ -100,10 +100,12 @@ class Colony:
             self.update_states()
             self.update_velocities()
             if self.array:
-                self.location_data[i] = self.locations
-                self.state_data[i] = self.states
-                self.signal_data[i] = self.signal
-                self.velocity_data[i] = self.velocities
+                if i%self.save_frequency==0:    
+                    j = int(i/self.save_frequency)
+                    self.location_data[j] = self.locations
+                    # self.state_data[j] = self.states
+                    # self.signal_data[j] = self.signal
+                    # self.velocity_data[j] = self.velocities
             if self.save == "all":
                 if i%self.save_frequency==0:
                     np.savez(f"{self.foldername}/data_{np.round(i*self.dt,2)}",locations=self.locations,states=self.states,velocities=self.velocities,signal=self.signal)
@@ -113,13 +115,15 @@ class Colony:
             
 
         if self.array:
-            return self.location_data, self.state_data, self.velocity_data, self.signal_data
+            return self.location_data
+            # return self.location_data, self.state_data, self.velocity_data, self.signal_data
         else:
             return None
     
     def update_states(self):
         self.signal = self.chemical(self.locations[:,0],self.locations[:,1])
         self.states += self.state_ODE(self.signal,self.states[:,0],self.states[:,1])*self.dt
+        # this is the limiting case te = 0 and y1 instantly adjusts to y2
         self.lambdas = self.lambda0-self.taxis_strength*(self.signal-self.states[:,1])
         
     def rotation_kernel(self,theta):
