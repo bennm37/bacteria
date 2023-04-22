@@ -36,6 +36,7 @@ def run_parallel(parameters,foldername,n_cores=mp.cpu_count):
         subcolony_parameters[i]["seed"] = parameters["seed"]+i
         subcolony_parameters[i]["foldername"] = f"{foldername}/subcolony_{i}"
         subcolonies.append(Colony(subcolony_parameters[i],False))
+    subcolonies[0].verbose = True
     print('Starting parallel run with {} cores'.format(n_cores))
     p = mp.Pool(n_cores)
     results = p.map(worker,subcolonies)
@@ -54,7 +55,7 @@ if __name__ == "__main__":
 
     parameters = {
         "M": 50000,
-        "N": 20,
+        "N": 10000,
         "Lx": 20,
         "Ly": 10,
         "te": 0.001,
