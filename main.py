@@ -5,6 +5,10 @@ import numpy as np
 from default_parameters import *
 from pyramid import offset_pyramid
 
+def state_ODE(C,x,y):
+    return np.array([(C-x-y)/parameters["te"],(C-y)/parameters["ta"]]).T
+def chemical(x,y):
+    return 8*offset_pyramid(x,y,c=[12,6])
 parameters["N"] = int(10)
 parameters["M"] = 2000
 parameters["seed"] = 1

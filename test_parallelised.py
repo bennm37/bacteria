@@ -79,12 +79,13 @@ if __name__ == "__main__":
 
     foldername = f"data/N={parameters['N']}_params_6.1_y1"
     times = np.arange(0,parameters["dt"]*parameters["M"],parameters["dt"]*parameters["save_frequency"])
-    locations = run_parallel(parameters,foldername,n_cores=8)
+    n_cores = 8
+    locations = run_parallel(parameters,foldername,n_cores=n_cores)
     for i,time in enumerate(times):
         np.savez(f"{foldername}/data_{np.round(time,2)}",locations=locations[i])
     a = Analysis(foldername,parameters,verbose=False,stride=1)
     anim = a.animate_dots()
-    anim.save(f"media/weird_dots_small_N={parameters['N']}_8.mp4",fps=40)
+    anim.save(f"media/weird_dots_small_N={parameters['N']}_{n_cores}.mp4",fps=40)
 
     # timing the functions
     # start_8 = time.perf_counter()
