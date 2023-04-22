@@ -31,7 +31,7 @@ def run_parallel(parameters,foldername,n_cores=mp.cpu_count):
         else:
             raise ValueError("Folder already exists")
     for i in range(n_cores):
-        os.mkdir(f"{foldername}/subcolony_{i}")
+        # os.mkdir(f"{foldername}/subcolony_{i}")
         subcolony_parameters[i]["N"] = population_sizes[i]
         subcolony_parameters[i]["seed"] = parameters["seed"]+i
         subcolony_parameters[i]["foldername"] = f"{foldername}/subcolony_{i}"
