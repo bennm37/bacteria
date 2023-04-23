@@ -77,8 +77,8 @@ def chemical_sin_gaussian(x, y):
 
 def run_sin_gaussian():
     parameters = {
-        "M": 100000,
-        "N": 10000,
+        "M": 200000,
+        "N": int(1e6),
         "Lx": 10,
         "Ly": 10,
         "te": 0.001,
@@ -114,6 +114,17 @@ def run_sin_gaussian():
         np.savez(f"{foldername}/data_{np.round(time,2)}", locations=locations[i])
     return foldername,parameters
 
+def plot_two_peaks_initial():
+    fig = plt.figure()
+    ax0 = fig.add_subplot(121, projection="3d")
+    ax1 = fig.add_subplot(122, projection="3d")
+    x = np.linspace(0, 10, 100)
+    y = np.linspace(0, 10, 100)
+    X, Y = np.meshgrid(x, y, indexing="ij")
+    ax0.plot_surface(X, Y, gaussian(X-2,Y),cmap="plasma")
+    ax1.plot_surface(X, Y, gaussian(X+2, Y),cmap="plasma")
+    plt.show()
+
 def state_ODE_two_peaks(C, y, te, ta):
     return np.array(
         [
@@ -128,19 +139,19 @@ def chemical_two_peaks(x, y):
 
 def run_two_peaks():
     parameters = {
-        "M": 100000,
-        "N": 10000,
+        "M": 200000,
+        "N": int(1e6),
         "Lx": 10,
         "Ly": 10,
         "te": 0.001,
         "ta": np.array([3,1]),
         "dt": 0.01,
         "dx": 0.01,
-        "chemical": chemical_sin_gaussian,
+        "chemical": chemical_two_peaks,
         "taxis_strength": 1,
         "speed": 0.1,
         "n_states": 3,
-        "state_ODE": state_ODE_sin_gaussian,
+        "state_ODE": state_ODE_two_peaks,
         "lambda0": 1,
         "initial_condition": "uniform",
         "dimension": 2,
@@ -151,7 +162,7 @@ def run_two_peaks():
         "foldername": "data/N=10000_params_6.1_y1",
         "save": "none",
     }
-    foldername = f"data/N={parameters['N']}_sin_gaussian_ta_{parameters['ta'][0]}_{parameters['ta'][1]}"
+    foldername = f"data/N={parameters['N']}_two_peaks_ta_{parameters['ta'][0]}_{parameters['ta'][1]}"
     times = np.arange(
         0,
         parameters["dt"] * parameters["M"],
@@ -218,9 +229,10 @@ def run_figure_6_1():
 
 if __name__ == "__main__":
     # run_figure_6_1()
-    plot_sin_gaussian_intial()
-    foldername,parameters = run_sin_gaussian()
-    a = Analysis(foldername, parameters, verbose=False, stride=1)
+    foldername1,parameters1 = run_two_peaks()
+    foldername2,parameters2 = run_sin_gaussian()
+    plot_two_peaks_initial()
+    a = Analysis(foldername1, parameters1, verbose=False, stride=1)
     anim = a.animate_density(10, nedges=40, scale=10)
     plt.show()
     # timing the functions
