@@ -2,9 +2,8 @@ import numpy as np
 import numpy.linalg as lag
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import matplotlib as mpl
 import matplotlib.animation as animation
-import os
-import shutil as sh
 import glob
 
 class Analysis:
@@ -57,6 +56,27 @@ class Analysis:
         ax.axis("equal")
         ax.axis("off")
     
+    def plot_trajectory(self,i,j=None):
+        if not j:
+            j = i+1
+        fig, ax = plt.subplots()
+        fig.set_size_inches(6,6)
+        cmap = mpl.colormaps["gist_heat"]
+        # colors = [cmap((k-i)/(j-i-1)) for k in range(i,j)]
+        # colors[2] = "darkblue"
+        colors = ["k"]
+        for k in range(i,j):
+            color = colors[k]
+            trajectory = ax.plot(self.location_data[:,k,0],self.location_data[:,k,1],linewidth=0.5,color=color)
+            ax.scatter(self.location_data[-1,k,0],self.location_data[-1,k,1],marker="o",color=color)
+        X,Y = np.meshgrid(np.linspace(0,self.parameters["Lx"],100),np.linspace(0,self.parameters["Ly"],100))
+        chemical_function = self.parameters["chemical"]
+        ax.imshow(chemical_function(X,Y),extent=(0,self.parameters["Lx"],0,self.parameters["Ly"]),origin="lower",cmap="coolwarm",alpha=0.5)
+        ax.axis("off")
+        ax.axis("equal")
+        ax.set(xlim=(0,self.parameters["Lx"]),ylim=(0,self.parameters["Ly"]))
+
+    
     def plot_density(self,i,ax=None,zmax=50,nedges=21,scale=1):
         locations = self.location_data[i,:,:]
         if self.verbose:
@@ -73,7 +93,7 @@ class Analysis:
             ax = fig.add_subplot(111, projection='3d')
         ax.set(xlim=(0, self.parameters["Lx"]), ylim=(0, self.parameters["Ly"]),zlim=(0, zmax))
         X, Y = np.meshgrid(xedges[:-1], yedges[:-1])
-        ax.plot_surface(X, Y, H, cmap=cm.coolwarm,vmin=0,vmax=zmax)
+        ax.plot_surface(X,Y, H.T, cmap=cm.coolwarm,vmin=0,vmax=zmax)
         return ax
     
     def animate(self,stride=1):
