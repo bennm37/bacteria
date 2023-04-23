@@ -69,7 +69,6 @@ def plot_figure_6_1():
     ax3.azim = 225
     plt.savefig("media/figure_6.1_redo.pdf")
     # plt.show()
-    # anim = a.animate_density(1,nedges=20,scale=1e6/19**2)
-    # plt.show()
 
-plot_figure_6_1()
+
+# plot_figure_6_1()

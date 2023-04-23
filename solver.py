@@ -33,6 +33,8 @@ class Colony:
         self.foldername = parameters["foldername"]
         self.save = parameters["save"]
         self.turn = 1
+        self.te = parameters["te"]
+        self.ta = parameters["ta"]
         np.random.seed(self.seed)
         self.initialise_cells()
 
@@ -41,9 +43,10 @@ class Colony:
         self.velocities = np.zeros([self.N, self.dimension])
         self.states = np.zeros([self.N, self.n_states])
         if self.initial_condition == "uniform":
-            self.locations = np.concatenate(
-                [np.random.uniform(0,self.Lx,self.N), np.random.uniform(0,self.Ly,self.N)], axis=1
-            )
+            # self.locations = np.concatenate(
+            #     [np.random.uniform(0,self.Lx,self.N), np.random.uniform(0,self.Ly,self.N)], axis=1
+            # )
+            self.locations = np.random.uniform(0, 1, [self.N, self.dimension])*[self.Lx,self.Ly]
             # self.locations = np.random.uniform(0, self.L, [self.N, self.dimension])
             self.thetas = np.random.uniform(-np.pi, np.pi, [self.N, 1])
             self.speeds = self.speed * np.ones([self.N, 1])
@@ -122,9 +125,11 @@ class Colony:
     
     def update_states(self):
         self.signal = self.chemical(self.locations[:,0],self.locations[:,1])
-        self.states += self.state_ODE(self.signal,self.states[:,0],self.states[:,1])*self.dt
-        # this is the limiting case te = 0 and y1 instantly adjusts to y2
-        self.lambdas = self.lambda0-self.taxis_strength*(self.signal-self.states[:,1])
+        self.states += self.state_ODE(self.signal,self.states,self.te,self.ta)*self.dt
+        # this is the limiting case te = 0 and y_np1 instantly adjusts to other variables
+        # y_np1 = sum_i=1^n (C_i-y_i) from quasi steady state
+        y_np1 = np.sum(self.signal-self.states[:,:-1],axis=1)
+        self.lambdas = self.lambda0-self.taxis_strength*y_np1
         
     def rotation_kernel(self,theta):
         return np.random.uniform(-np.pi,np.pi,self.N)
